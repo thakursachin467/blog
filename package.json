@@ -1,0 +1,26 @@
+{
+  "name": "graphql-blog",
+  "version": "1.0.0",
+  "description": "A GRAPHQL API for blog",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-dev": "nodemon app.js --exec babel-node"
+  },
+  "author": "Sachin Thakur",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "nodemon": "^1.18.10"
+  },
+  "dependencies": {
+    "appmetrics-dash": "^4.1.0",
+    "appmetrics-prometheus": "^2.0.0",
+    "appmetrics-zipkin": "^1.1.1",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "graphql-yoga": "^1.16.7",
+    "log4js": "^4.1.0"
+  }
+}

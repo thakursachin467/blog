@@ -1,4 +1,5 @@
-import { GraphQLServer } from 'graphql-yoga'
+import { GraphQLServer } from 'graphql-yoga';
+import uuidV4 from 'uuid';
 const Port = process.env.Port || 8000;
 
 const posts = [{
@@ -94,10 +95,60 @@ const typeDefs = `
     comments:[Comment!]!
   }
 
+  type Mutation {
+    createUser(email:String!,age:Int,firstName:String!,lastName:String,password:String!):User!
+    createPost(body:String!,title:String!,Published:Boolean!,author:ID!):Post!
+    createComment(text:String!,author:ID!,post:ID!):Comment!
+  }
+
 `
 
 
 const resolvers = {
+  Mutation: {
+    createUser(parent, args, ctx, info) {
+      const emailTaken = users.some((user) => user.email === args.email);
+      if (emailTaken) {
+        throw new Error('This email already exists');
+      }
+      const user = {
+        id: uuidV4(),
+        ...args
+      }
+      users.push(user);
+      return user;
+    },
+    createPost(parent, args, ctx, info) {
+      const author = args.author;
+      const authorExists = users.some((user) => user.id === author);
+      if (!authorExists) {
+        throw new Error('User does not exists');
+      }
+      const post = {
+        id: uuidV4(),
+        ...args
+      }
+      posts.push(post);
+      return post;
+    },
+    createComment(parent, args, ctx, info) {
+      const postId = args.post;
+      const author = args.author;
+      const authorExists = users.some((user) => user.id === author);
+      const postExists = posts.some((post) => {
+        return post.id == postId && post.Published === true;
+      });
+      if (!authorExists || !postExists) {
+        throw new Error(`Something went wrong! ${authorExists} ${postExists}`);
+      }
+      const comment = {
+        id: uuidV4(),
+        ...args
+      }
+      comments.push(comment);
+      return comment;
+    }
+  },
   Query: {
     me() {
       return {

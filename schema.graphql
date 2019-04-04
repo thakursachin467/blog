@@ -1,4 +1,24 @@
 
+type Subscription {
+  comment(postId:ID!): CommentSubscriptionPayload!
+  post:PostSubscriptionPayload!
+}
+
+enum mutationType {
+  Created
+  Deleted
+  Updated
+}
+ type PostSubscriptionPayload{
+   mutation:mutationType!
+   data:Post!
+ }
+
+ type CommentSubscriptionPayload{
+   mutation:mutationType!
+   data:Comment!
+ }
+
   type User {
     id: ID!
     email: String!
@@ -53,12 +73,30 @@
     post:ID!
   }
 
+  input editUserInput{
+    email:String,
+    age:Int,
+    firstName:String,
+    lastName:String,
+    password:String
+  }
+  input editCommentInput{
+      text:String,
+  }
+  input editPostInput{
+    body:String,
+    title:String,
+    Published:Boolean,
+  }
   type Mutation {
     createUser(data:CreateUserInput):User!
+    editUser(id: ID!,data:editUserInput):User!
     deleteUser(id:ID!):User!
     createPost(data:CreatePostInput):Post!
+    editPost(id:ID!,data:editPostInput):Post!
     deletePost(id:ID!): Post!
     createComment(data:CreateCommentInput):Comment!
+    editComment(id:ID!,data:editCommentInput):Comment!
     deleteComment(id:ID!): Boolean!
   }
 

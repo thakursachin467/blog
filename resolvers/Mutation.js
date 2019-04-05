@@ -1,4 +1,5 @@
 import uuidV4 from 'uuid';
+import ReadTimeCalc from '../Utils/ReadTimeCalculator';
 const Mutation = {
   createUser(parent, args, { db }, info) {
     const emailTaken = db.users.some((user) => user.email === args.data.email);
@@ -66,8 +67,10 @@ const Mutation = {
     if (!authorExists) {
       throw new Error('User does not exists');
     }
+    const readTime = ReadTimeCalc(args.body);
     const post = {
       id: uuidV4(),
+      readTime,
       ...args.data
     }
     db.posts.push(post);
@@ -89,6 +92,7 @@ const Mutation = {
     }
     if (typeof data.body === 'string') {
       post.body = data.body;
+      post.readTime = ReadTimeCalc(data.body);
     }
     if (typeof data.title === 'string') {
       post.title = data.title;
@@ -119,8 +123,6 @@ const Mutation = {
       }
 
     }
-
-
     return post;
   },
   deletePost(parent, args, { db, pubsub }, info) {

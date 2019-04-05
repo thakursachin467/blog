@@ -19,6 +19,6 @@ type Comment {
     body: String!
     Published: Boolean!
     title: String!
+    readTime: String!
     author: User!
-    comments:[Comment!]!
   }

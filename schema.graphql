@@ -42,6 +42,7 @@ enum mutationType {
     Published: Boolean!
     title: String!
     author: User!
+    readTime: String!
     comments:[Comment!]!
   }
   type Query {

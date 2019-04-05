@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-dev": "nodemon app.js --ext js,graphql --exec babel-node"
+    "start-dev": "nodemon app.js --ext js,graphql --exec babel-node",
+    "get-schema": "graphql get-schema -p blog-api"
   },
   "author": "Sachin Thakur",
   "license": "ISC",
@@ -21,8 +22,10 @@
     "appmetrics-zipkin": "^1.1.1",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
+    "graphql-cli": "^3.0.11",
     "graphql-yoga": "^1.16.7",
     "log4js": "^4.1.0",
+    "prisma-binding": "^2.3.10",
     "uuid": "^3.3.2"
   }
 }

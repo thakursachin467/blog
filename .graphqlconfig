@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "blog-api": {
+      "schemaPath": "./generated/database.graphql",
+      "extensions": {
+        "endpoints": {
+          "default": "http://localhost:4466/"
+        }
+      }
+    }
+  }
+}

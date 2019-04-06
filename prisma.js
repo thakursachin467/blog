@@ -49,11 +49,21 @@ const createCommentForUser = async (author, data, filter) => {
 
 
 const getPost = async (postId, filter) => {
-
+  const post = await prisma.query.post({ where: { id: postId } }, filter);
+  try {
+    return post;
+  } catch (err) {
+    return err;
+  }
 }
 
-const getPosts = async (authorId, filter) => {
-
+const getPosts = async (filter) => {
+  const posts = await prisma.query.post(null, filter);
+  try {
+    return posts;
+  } catch (err) {
+    return err;
+  }
 };
 
 
@@ -76,7 +86,7 @@ const commentExists = async (filter) => {
 }
 
 
-const checkPostExists = async (filter) => {
+const postExists = async (filter) => {
   const postExists = await prisma.exists.Post(filter);
   try {
     return postExists;

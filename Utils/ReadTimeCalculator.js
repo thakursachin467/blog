@@ -5,8 +5,8 @@ const calculateTime = (timeTaken) => {
     readTime = `${readTime} seconds`;
     return readTime;
   }
-  const minutes = Math.floor(timeTaken);
-  const seconds = timeTaken - Math.floor(timeTaken);
+  let minutes = Math.floor(timeTaken);
+  let seconds = timeTaken - Math.floor(timeTaken);
   if (seconds > 30) {
     minutes = Math.floor(minutes + 1);
   }

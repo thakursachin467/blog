@@ -1,8 +1,12 @@
 import { GraphQLServer, PubSub } from 'graphql-yoga';
 import db from './db';
 import { Mutation, Query, Post, User, Comment, Subscription } from './resolvers/index';
+import './prisma';
 const Port = process.env.Port || 8000;
+import * as Sentry from '@sentry/node';
+import Keys from './Config/Credintials/Keys';
 
+Sentry.init({ dsn: Keys.sentryKey });
 
 const pubsub = new PubSub();
 

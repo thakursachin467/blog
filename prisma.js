@@ -6,6 +6,8 @@ const prisma = new Prisma({
 })
 
 
+export { prisma as default };
+
 //prisma.query.users(null, '{firstName lastName id email}')
 // .then((data) => {
 //   console.log(data)

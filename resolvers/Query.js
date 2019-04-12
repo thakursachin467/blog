@@ -1,6 +1,18 @@
 const Query = {
   posts(parent, args, { database }, info) {
-    return database.query.posts(null, info);
+    let filter = {}
+    if (args.query) {
+      filter = {
+        where: {
+          OR: [{
+            title_contains: args.query
+          }, {
+            body_contains: args.query
+          }]
+        }
+      }
+    }
+    return database.query.posts(filter, info);
     //  if (!args.query) {
     //    return db.posts;
     //  }
@@ -10,6 +22,18 @@ const Query = {
     //  });
   },
   users(parent, args, { database }, info) {
+    let filter = {}
+    if (args.query) {
+      filter = {
+        where: {
+          OR: [{
+            name_contains: args.query
+          }, {
+            email_contains: args.query
+          }]
+        }
+      }
+    }
     return database.query.users(null, info);
     //  if (!args.query) {
     //    return users;

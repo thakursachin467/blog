@@ -55,7 +55,7 @@ const Mutation = {
     postCreated = await database.mutation.createPost({ data: post }, info);
     return postCreated;
   },
-  async editPost(parent, { id, data }, { database, pubsub }, info) {
+  async editPost(parent, { id, data }, { database }, info) {
     const post = await database.exists.Post({ id: id });
     const originalPost = post;
     if (!post) {
@@ -74,7 +74,7 @@ const Mutation = {
     const updatedPost = await database.mutation.updatePost({ where: { id: id }, data: data }, info);
     return updatedPost;
   },
-  async deletePost(parent, args, { database, pubsub }, info) {
+  async deletePost(parent, args, { database }, info) {
     const postId = args.id;
     const postIndex = await database.exists.Post({ id: postId });
     if (!postIndex) {
@@ -83,7 +83,7 @@ const Mutation = {
     const deletedPost = await database.mutation.deletePost({ where: { id: postId } }, info);
     return deletedPost;
   },
-  async  createComment(parent, args, { database, pubsub }, info) {
+  async  createComment(parent, args, { database }, info) {
     const postId = args.data.post;
     const author = args.data.author;
     const authorExists = await database.exists.User({ id: author });

@@ -1,79 +1,50 @@
 import uuidV4 from 'uuid';
 import ReadTimeCalc from '../Utils/ReadTimeCalculator';
 const Mutation = {
-  createUser(parent, args, { db }, info) {
-    const emailTaken = db.users.some((user) => user.email === args.data.email);
+  async createUser(parent, args, { database }, info) {
+    const emailTaken = await database.exists.User({ email: args.data.email });
     if (emailTaken) {
-      throw new Error('This email already exists');
+      throw new Error('This email already registered with us!');
     }
-    const user = {
-      id: uuidV4(),
-      ...args.data
-    }
-    db.users.push(user);
+    const user = await database.mutation.createUser({ data: args.data }, info);
     return user;
   },
-  editUser(parent, args, { db }, info) {
+  async editUser(parent, args, { database }, info) {
     const userId = args.id;
-    const { data } = args;
-    const user = db.users.find(user => user.id === userId);
-    if (!user) {
+    const userExists = await database.exists.User({ id: userId });
+    if (!userExists) {
       throw new Error('This user does not exists!');
     }
-    if (typeof data.email === 'string') {
-      const emailTaken = db.users.some((user) => user.email === data.email && user.id !== userId);
-      if (emailTaken) {
-        throw new Error('This email already exists');
-      }
-      user.email = data.email;
-    }
-    if (typeof data.firstName === 'string') {
-      user.firstName = data.firstName;
-    }
-    if (typeof data.lastName !== 'undefined') {
-      user.lastName = data.lastName;
-    }
-    if (typeof data.age !== 'undefined') {
-      user.age = data.age;
-    }
-    if (typeof data.password === 'string' || typeof data.password === 'number' || typeof data.password === 'symbol') {
-      user.password = data.password;
-    }
-
-    return user;
+    const updatedUser = await database.mutation.updateUser({ where: { id: userId }, data: args.data }, info);
+    return updatedUser;
   },
-  deleteUser(parent, args, { db }, info) {
+  async deleteUser(parent, args, { database }, info) {
     const userId = args.id;
-    const userIndex = db.users.findIndex(user => user.id === userId);
-    if (userIndex === -1) {
+    const userExists = await database.exists.User({ id: userId });
+    if (!userExists) {
       throw new Error('This user does not exists!');
     }
-    const removedUser = db.users.splice(userIndex, 1);
-    db.posts = db.posts.filter((post) => {
-      const match = post.author === userId;
-      if (match) {
-        db.comments = db.comments.filter((comment) => {
-          return comment.post !== post.id;
-        });
-      }
-      db.comments = db.comments.filter(comment => comment.author !== userId);
-      return !match;
-    });
-    return removedUser[0];
+    const userDeleted = await database.mutation.deleteUser({ where: { id: userId } }, info);
+    return userDeleted;
   },
-  createPost(parent, args, { db, pubsub }, info) {
+  async createPost(parent, args, { database, pubsub }, info) {
     const author = args.data.author;
-    const authorExists = db.users.some((user) => user.id === author);
+    const authorExists = await database.exists.User({ id: author });
     if (!authorExists) {
       throw new Error('User does not exists');
     }
-    const readTime = ReadTimeCalc(args.body);
+    const readTime = ReadTimeCalc(args.data.body);
     const post = {
-      id: uuidV4(),
+      ...args.data,
       readTime,
-      ...args.data
+      author: {
+        connect: {
+          id: args.data.author
+        }
+      }
     }
-    db.posts.push(post);
+    console.log(post);
+    let postCreated;
     if (post.Published) {
       const payload = {
         mutation: 'Created',
@@ -81,122 +52,86 @@ const Mutation = {
       }
       pubsub.publish('posts', { post: payload });
     }
-
-    return post;
+    postCreated = await database.mutation.createPost({ data: post }, info);
+    return postCreated;
   },
-  editPost(parent, { id, data }, { db, pubsub }, info) {
-    const post = db.posts.find(post => post.id === id);
+  async editPost(parent, { id, data }, { database, pubsub }, info) {
+    const post = await database.exists.Post({ id: id });
     const originalPost = post;
     if (!post) {
       throw new Error('Post does not exists')
     }
     if (typeof data.body === 'string') {
-      post.body = data.body;
-      post.readTime = ReadTimeCalc(data.body);
+      data.body = data.body;
+      data.readTime = ReadTimeCalc(data.body);
     }
     if (typeof data.title === 'string') {
-      post.title = data.title;
+      data.title = data.title;
     }
     if (typeof data.Published === 'boolean') {
-      post.Published = data.Published;
-      if (post.Published && !originalPost.Published) {
-        const payload = {
-          mutation: 'Created',
-          data: post
-        }
-        pubsub.publish('posts', { post: payload });
-      }
-      if (originalPost.Published && !post.Published) {
-        const payload = {
-          mutation: 'Deleted',
-          data: originalPost
-        }
-        pubsub.publish('posts', { post: payload });
-      }
-
-      if (post.Published) {
-        const payload = {
-          mutation: 'Updated',
-          data: post
-        }
-        pubsub.publish('posts', { post: payload });
-      }
-
+      data.Published = data.Published;
     }
-    return post;
+    const updatedPost = await database.mutation.updatePost({ where: { id: id }, data: data }, info);
+    return updatedPost;
   },
-  deletePost(parent, args, { db, pubsub }, info) {
+  async deletePost(parent, args, { database, pubsub }, info) {
     const postId = args.id;
-    const postIndex = db.posts.findIndex(post => post.id === postId);
-    if (postId === -1) {
+    const postIndex = await database.exists.Post({ id: postId });
+    if (!postIndex) {
       throw new Error('The post Does not exist');
     }
-    const removedPost = db.posts.slice(postIndex, 1);
-    db.comments = db.comments.filter(comment => comment.post !== postId);
-    if (removedPost[0].Published) {
-      const payload = {
-        mutation: 'Deleted',
-        data: removedPost[0]
-      }
-      pubsub.publish('posts', { post: payload })
-    }
-    return removedPost[0];
+    const deletedPost = await database.mutation.deletePost({ where: { id: postId } }, info);
+    return deletedPost;
   },
-  createComment(parent, args, { db, pubsub }, info) {
+  async  createComment(parent, args, { database, pubsub }, info) {
     const postId = args.data.post;
     const author = args.data.author;
-    const authorExists = db.users.some((user) => user.id === author);
-    const postExists = db.posts.some((post) => {
-      return post.id == postId && post.Published === true;
-    });
+    const authorExists = await database.exists.User({ id: author });
+    const postExists = await database.exists.Post({ id: postId });
     if (!authorExists || !postExists) {
       throw new Error(`Something went wrong! ${authorExists} ${postExists}`);
     }
-    const comment = {
-      id: uuidV4(),
-      ...args.data
+    const commentData = {
+      text: args.data.text,
+      post: {
+        connect:
+        {
+          id: postId
+        }
+      },
+      author:
+      {
+        connect:
+        {
+          id: author
+        }
+      }
     }
-    db.comments.push(comment);
-    const payload = {
-      mutation: 'Created',
-      data: comment
-    }
-    pubsub.publish(`comment_${postId}`, { comment: payload });
+    const comment = await database.mutation.createComment({ data: commentData }, info);
     return comment;
   },
-  editComment(parent, args, { db, pubsub }, info) {
+  async  editComment(parent, args, { database, pubsub }, info) {
     const commentId = args.id;
     const { data } = args;
-    const comment = db.comments.find((comment) => {
-      return comment.id == commentId;
-    });
+    const comment = await database.exists.Comment({ id: commentId });
     if (!comment) {
       throw new Error('Comment does not exists')
     }
-    if (typeof data.text === 'string') {
-      comment.text = data.text;
-      const payload = {
-        data: 'Updated',
-        data: comment
-      }
-      pubsub.publish(`comment_${comment.postId}`, { comment: payload })
-    }
+    const comment = await database.mutation.updateComment({ where: { id: commentId }, data: { text: data.text } }, info)
     return comment;
   },
-  deleteComment(parent, args, { db }, info) {
+  async deleteComment(parent, args, { database }, info) {
     const commentId = args.id;
-    const commentIndex = db.comments.findIndex(comment => comment.id === commentId);
-    if (commentIndex === -1) {
+    const commentIndex = await database.exists.Comment({ id: commentId });
+    if (!commentIndex) {
       throw new Error('Invalid Comment!');
     }
-    db.comments = db.comments.filter(comment => comment.id !== commentId);
-    const comment = comments[commentIndex];
-    const payload = {
-      data: 'Deleted',
-      data: comment
+    const deleteComment = await database.mutation.deleteComment({ where: { id: commentId } }, info);
+    if (deleteComment) {
+      return true;
+    } else {
+      return false;
     }
-    pubsub.publish(`comment_${comment.postId}`, { comment: payload })
-    return true;
   }
 }
 

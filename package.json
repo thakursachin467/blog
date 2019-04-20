@@ -21,12 +21,13 @@
     "appmetrics-dash": "^4.1.0",
     "appmetrics-prometheus": "^2.0.0",
     "appmetrics-zipkin": "^1.1.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "graphql-cli": "^3.0.11",
     "graphql-yoga": "^1.16.7",
+    "jsonwebtoken": "^8.5.1",
     "log4js": "^4.1.0",
-    "prisma-binding": "^2.3.10",
-    "uuid": "^3.3.2"
+    "prisma-binding": "^2.3.10"
   }
 }

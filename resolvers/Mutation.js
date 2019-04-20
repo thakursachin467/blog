@@ -1,13 +1,44 @@
-import uuidV4 from 'uuid';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import ReadTimeCalc from '../Utils/ReadTimeCalculator';
 const Mutation = {
   async createUser(parent, args, { database }, info) {
     const emailTaken = await database.exists.User({ email: args.data.email });
+    const password = args.data.password;
+    if (password.length < 8) {
+      throw new Error('Password must be atlease 8 characters long')
+    }
     if (emailTaken) {
       throw new Error('This email already registered with us!');
     }
-    const user = await database.mutation.createUser({ data: args.data }, info);
-    return user;
+    const newPassword = await bcrypt.hash(password, 12);
+    const user = await database.mutation.createUser({
+      data: {
+        ...args.data,
+        password: newPassword
+      }
+    });
+    const token = jwt.decode({ id: user.id }, 'thisisoursecret')
+    return {
+      user,
+      token
+    };
+  },
+  async loginUser(parent, args, { database }, info) {
+    const { email, password } = args.data;
+    const user = await database.query.User({ where: { email: email } }, null);
+    if (!user) {
+      throw new Error('No user with this email exists');
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      throw new Error('Password is incorrect');
+    }
+    const token = jwt.sign({ id: user.id }, 'thisisoursecret');
+    return {
+      user,
+      token
+    }
   },
   async editUser(parent, args, { database }, info) {
     const userId = args.id;

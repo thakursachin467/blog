@@ -22,6 +22,7 @@ enum mutationType {
   type User {
     id: ID!
     email: String!
+    password: String!
     firstName: String!
     lastName: String
     age: Int
@@ -89,8 +90,18 @@ enum mutationType {
     title:String,
     Published:Boolean,
   }
+  type authPayload {
+    token: String!
+    user: User!
+  }
+
+  type loginUserInput{
+    email: String!
+    password: String!
+  }
   type Mutation {
-    createUser(data:CreateUserInput):User!
+    createUser(data:CreateUserInput):authPayload!
+    loginUser(data:loginUserInput):authPayload!
     editUser(id: ID!,data:editUserInput):User!
     deleteUser(id:ID!):User!
     createPost(data:CreatePostInput):Post!

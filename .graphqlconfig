@@ -3,6 +3,7 @@
     "blog-api": {
       "schemaPath": "./generated/database.graphql",
       "extensions": {
+        "prisma":"database/prisma/prisma.yml",
         "endpoints": {
           "default": "http://localhost:4466/"
         }

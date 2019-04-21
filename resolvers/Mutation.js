@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import ReadTimeCalc from '../Utils/ReadTimeCalculator';
+import Keys from '../Config/Credintials/Keys';
+import authorization from '../Utils/Authorization';
 const Mutation = {
   async createUser(parent, args, { database }, info) {
     const emailTaken = await database.exists.User({ email: args.data.email });
@@ -18,7 +20,7 @@ const Mutation = {
         password: newPassword
       }
     });
-    const token = jwt.decode({ id: user.id }, 'thisisoursecret')
+    const token = jwt.decode({ id: user.id }, Keys.SecretOrKey)
     return {
       user,
       token
@@ -26,22 +28,22 @@ const Mutation = {
   },
   async loginUser(parent, args, { database }, info) {
     const { email, password } = args.data;
-    const user = await database.query.User({ where: { email: email } }, null);
+    const user = await database.query.User({ where: { email: email } });
     if (!user) {
-      throw new Error('No user with this email exists');
+      throw new Error('Unable to login! Incorrect Credintials');
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw new Error('Password is incorrect');
+      throw new Error('Unable to login! Incorrect Credintials');
     }
-    const token = jwt.sign({ id: user.id }, 'thisisoursecret');
+    const token = jwt.sign({ id: user.id }, Keys.SecretOrKey);
     return {
       user,
       token
     }
   },
-  async editUser(parent, args, { database }, info) {
-    const userId = args.id;
+  async editUser(parent, args, { database, request }, info) {
+    const userId = authorization(request)
     const userExists = await database.exists.User({ id: userId });
     if (!userExists) {
       throw new Error('This user does not exists!');
@@ -49,8 +51,8 @@ const Mutation = {
     const updatedUser = await database.mutation.updateUser({ where: { id: userId }, data: args.data }, info);
     return updatedUser;
   },
-  async deleteUser(parent, args, { database }, info) {
-    const userId = args.id;
+  async deleteUser(parent, args, { database, request }, info) {
+    const userId = authorization(request)
     const userExists = await database.exists.User({ id: userId });
     if (!userExists) {
       throw new Error('This user does not exists!');
@@ -58,9 +60,9 @@ const Mutation = {
     const userDeleted = await database.mutation.deleteUser({ where: { id: userId } }, info);
     return userDeleted;
   },
-  async createPost(parent, args, { database, pubsub }, info) {
-    const author = args.data.author;
-    const authorExists = await database.exists.User({ id: author });
+  async createPost(parent, args, { database, request }, info) {
+    const userId = authorization(request)
+    const authorExists = await database.exists.User({ id: userId });
     if (!authorExists) {
       throw new Error('User does not exists');
     }
@@ -70,23 +72,16 @@ const Mutation = {
       readTime,
       author: {
         connect: {
-          id: args.data.author
+          id: userId
         }
       }
     }
-    console.log(post);
     let postCreated;
-    if (post.Published) {
-      const payload = {
-        mutation: 'Created',
-        data: post
-      }
-      pubsub.publish('posts', { post: payload });
-    }
     postCreated = await database.mutation.createPost({ data: post }, info);
     return postCreated;
   },
-  async editPost(parent, { id, data }, { database }, info) {
+  async editPost(parent, { id, data }, { database, request }, info) {
+    const userId = authorization(request)
     const post = await database.exists.Post({ id: id });
     const originalPost = post;
     if (!post) {
@@ -105,7 +100,8 @@ const Mutation = {
     const updatedPost = await database.mutation.updatePost({ where: { id: id }, data: data }, info);
     return updatedPost;
   },
-  async deletePost(parent, args, { database }, info) {
+  async deletePost(parent, args, { database, request }, info) {
+    const userId = authorization(request)
     const postId = args.id;
     const postIndex = await database.exists.Post({ id: postId });
     if (!postIndex) {
@@ -114,9 +110,9 @@ const Mutation = {
     const deletedPost = await database.mutation.deletePost({ where: { id: postId } }, info);
     return deletedPost;
   },
-  async  createComment(parent, args, { database }, info) {
+  async  createComment(parent, args, { database, request }, info) {
     const postId = args.data.post;
-    const author = args.data.author;
+    const author = authorization(request);
     const authorExists = await database.exists.User({ id: author });
     const postExists = await database.exists.Post({ id: postId });
     if (!authorExists || !postExists) {
@@ -141,7 +137,8 @@ const Mutation = {
     const comment = await database.mutation.createComment({ data: commentData }, info);
     return comment;
   },
-  async  editComment(parent, args, { database, pubsub }, info) {
+  async  editComment(parent, args, { database, request }, info) {
+    const author = authorization(request);
     const commentId = args.id;
     const { data } = args;
     const comment = await database.exists.Comment({ id: commentId });
@@ -151,7 +148,8 @@ const Mutation = {
     const comment = await database.mutation.updateComment({ where: { id: commentId }, data: { text: data.text } }, info)
     return comment;
   },
-  async deleteComment(parent, args, { database }, info) {
+  async deleteComment(parent, args, { database, request }, info) {
+    const author = authorization(request);
     const commentId = args.id;
     const commentIndex = await database.exists.Comment({ id: commentId });
     if (!commentIndex) {

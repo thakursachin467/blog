@@ -24,10 +24,13 @@ const server = new GraphQLServer(
   {
     typeDefs: './schema.graphql',
     resolvers,
-    context: {
-      db,
-      database,
-      pubsub
+    context(request) {
+      return {
+        db,
+        database,
+        pubsub,
+        request
+      }
     }
   });
 

@@ -21,7 +21,7 @@ enum mutationType {
 
   type User {
     id: ID!
-    email: String!
+    email: String
     password: String!
     firstName: String!
     lastName: String
@@ -48,10 +48,11 @@ enum mutationType {
   }
   type Query {
     me: User!
-    post: Post!
+    post(id:ID!): Post!
     users(query: String):[User!]!
     posts(query:String):[Post!]!
     comments:[Comment!]!
+    myPost(query:String):[Post!]!
   }
 
   input CreateUserInput {

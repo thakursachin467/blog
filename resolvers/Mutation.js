@@ -82,6 +82,10 @@ const Mutation = {
   },
   async editPost(parent, { id, data }, { database, request }, info) {
     const userId = authorization(request)
+    const postFound = await database.exists.Post({ id: postId, author: { id: userId } });
+    if (!postFound) {
+      throw new Error('You are not authorize to perform this action!')
+    }
     const post = await database.exists.Post({ id: id });
     const originalPost = post;
     if (!post) {
@@ -103,6 +107,10 @@ const Mutation = {
   async deletePost(parent, args, { database, request }, info) {
     const userId = authorization(request)
     const postId = args.id;
+    const postFound = await database.exists.Post({ id: postId, author: { id: userId } });
+    if (!postFound) {
+      throw new Error('You are not authorize to perform this action!')
+    }
     const postIndex = await database.exists.Post({ id: postId });
     if (!postIndex) {
       throw new Error('The post Does not exist');
@@ -140,6 +148,10 @@ const Mutation = {
   async  editComment(parent, args, { database, request }, info) {
     const author = authorization(request);
     const commentId = args.id;
+    const commentExists = await database.exists.Comment({ id: commentId, author: { id: author } });
+    if (!commentExists) {
+      throw new Error('You are not authorize to perform this action');
+    }
     const { data } = args;
     const comment = await database.exists.Comment({ id: commentId });
     if (!comment) {
@@ -151,6 +163,10 @@ const Mutation = {
   async deleteComment(parent, args, { database, request }, info) {
     const author = authorization(request);
     const commentId = args.id;
+    const commentExists = await database.exists.Comment({ id: commentId, author: { id: author } });
+    if (!commentExists) {
+      throw new Error('You are not authorize to perform this action');
+    }
     const commentIndex = await database.exists.Comment({ id: commentId });
     if (!commentIndex) {
       throw new Error('Invalid Comment!');

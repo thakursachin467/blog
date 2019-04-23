@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import Keys from '../Config/Credintials/Keys';
 const authorization = (request, requireAuth = true) => {
-  const { authorization } = request.request.headers;
+  const authorization = request.request ? request.request.headers.authorization : request.connection.context.Authorization;
   if (authorization) {
     const token = authorization.replace('Bearer ', '');
     const decoded = jwt.verify(token, Keys.SecretOrKey);

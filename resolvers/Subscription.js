@@ -1,8 +1,8 @@
 
-
+import authorization from '../Utils/Authorization';
 const Subscription = {
   comment: {
-    subscribe(parent, args, { database }, info) {
+    subscribe(parent, args, { database, request }, info) {
       return database.subscription.comment({
         where:
         {
@@ -26,6 +26,21 @@ const Subscription = {
           node:
           {
             Published: true
+          }
+        }
+      }, info)
+    }
+  },
+  myPost: {
+    subscribe(parent, args, { database, request }, info) {
+      const userId = authorization(request);
+      return database.subscription.post({
+        where:
+        {
+          node: {
+            author: {
+              id: userId
+            }
           }
         }
       }, info)

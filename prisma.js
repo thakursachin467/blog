@@ -4,7 +4,8 @@ import * as Keys from './Config/Credintials/Keys';
 const prisma = new Prisma({
   typeDefs: './generated/database.graphql',
   endpoint: 'http://localhost:4466/',
-  secret: 'thisismysecrettext'
+  secret: 'thisismysecrettext',
+  fragmentReplacements
 })
 
 

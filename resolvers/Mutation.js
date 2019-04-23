@@ -1,26 +1,22 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { hashPassword } from '../Utils/hashPassword';
 import ReadTimeCalc from '../Utils/ReadTimeCalculator';
-import Keys from '../Config/Credintials/Keys';
 import authorization from '../Utils/Authorization';
+import { generateToken } from '../Utils/generateToken';
 const Mutation = {
   async createUser(parent, args, { database }, info) {
     const emailTaken = await database.exists.User({ email: args.data.email });
     const password = args.data.password;
-    if (password.length < 8) {
-      throw new Error('Password must be atlease 8 characters long')
-    }
     if (emailTaken) {
       throw new Error('This email already registered with us!');
     }
-    const newPassword = await bcrypt.hash(password, 12);
+    const newPassword = await hashPassword(password);
     const user = await database.mutation.createUser({
       data: {
         ...args.data,
         password: newPassword
       }
     });
-    const token = jwt.decode({ id: user.id }, Keys.SecretOrKey)
+    const token = generateToken(user);
     return {
       user,
       token
@@ -36,7 +32,7 @@ const Mutation = {
     if (!isMatch) {
       throw new Error('Unable to login! Incorrect Credintials');
     }
-    const token = jwt.sign({ id: user.id }, Keys.SecretOrKey);
+    const token = generateToken(user);
     return {
       user,
       token
@@ -122,9 +118,9 @@ const Mutation = {
     const postId = args.data.post;
     const author = authorization(request);
     const authorExists = await database.exists.User({ id: author });
-    const postExists = await database.exists.Post({ id: postId });
+    const postExists = await database.exists.Post({ id: postId, Published: true });
     if (!authorExists || !postExists) {
-      throw new Error(`Something went wrong! ${authorExists} ${postExists}`);
+      throw new Error(`Something went wrong!`);
     }
     const commentData = {
       text: args.data.text,

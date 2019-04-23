@@ -2,6 +2,7 @@
 type Subscription {
   comment(postId:ID!): CommentSubscriptionPayload!
   post:PostSubscriptionPayload!
+  myPost: PostSubscriptionPayload!
 }
 
 enum mutationType {
@@ -28,6 +29,8 @@ enum mutationType {
     age: Int
     posts: [Post!]!
     comments: [Comment!]!
+    updatedAt: String!
+    createdAt: String!
   } 
 
   type Comment {
@@ -35,6 +38,8 @@ enum mutationType {
     text: String!
     author: User!
     post: Post!
+    updatedAt: String!
+    createdAt: String!
   }
 
   type Post {
@@ -45,14 +50,16 @@ enum mutationType {
     author: User!
     readTime: String!
     comments:[Comment!]!
+    updatedAt: String!
+    createdAt: String!
   }
   type Query {
     me: User!
     post(id:ID!): Post!
-    users(query: String):[User!]!
-    posts(query:String):[Post!]!
-    comments:[Comment!]!
-    myPost(query:String):[Post!]!
+    users(query: String,limit: Int,skip: Int,after:String):[User!]!
+    posts(query:String,limit: Int,skip: Int,after: String):[Post!]!
+    comments(limit: Int,skip: Int,after: String):[Comment!]!
+    myPost(query:String,limit: Int,skip: Int,after: String):[Post!]!
   }
 
   input CreateUserInput {

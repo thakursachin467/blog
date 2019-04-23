@@ -6,6 +6,8 @@ type User {
   email:String! @unique
   posts: [Post!]!  @relation(name:"PostToUser",onDelete:CASCADE)
   comments: [Comment!]! @relation(name:"CommentToUser",onDelete:CASCADE)
+  updatedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type Comment {
@@ -13,6 +15,8 @@ type Comment {
     text: String!
     author: User! @relation(name:"CommentToUser",onDelete:SET_NULL)
     post: Post!  @relation(name:"CommentToPost",onDelete:SET_NULL)
+    updatedAt: DateTime!
+    createdAt: DateTime!
   }
 
   type Post {
@@ -23,4 +27,6 @@ type Comment {
     readTime: String!
     author: User!  @relation(name:"PostToUser",onDelete:SET_NULL)
     comments: [Comment!]!  @relation(name:"CommentToPost",onDelete:CASCADE)
+    updatedAt: DateTime!
+    createdAt: DateTime!
   }

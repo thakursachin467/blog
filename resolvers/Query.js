@@ -2,12 +2,17 @@ import authorization from '../Utils/Authorization';
 const Query = {
   posts(parent, args, { database, request }, info) {
     let filter = {
+      first: args.limit,
+      skip: args.skip,
+      after: args.after,
       where: {
         Published: true
       }
     }
     if (args.query) {
       filter = {
+        first: args.first,
+        skip: args.skip,
         where: {
           Published: true,
           OR: [{
@@ -22,9 +27,18 @@ const Query = {
   },
   async myPost(parent, args, { database, request }, info) {
     const userId = authorization(request, true);
-    let filter = { where: { author: { id: userId } } };
+    let filter = {
+      first: args.limit,
+      skip: args.skip,
+      after: args.after,
+      where:
+        { author: { id: userId } }
+    };
     if (args.query) {
       filter = {
+        first: args.limit,
+        skip: args.skip,
+        after: args.after,
         where: {
           author: { id: userId },
           OR: [{
@@ -45,6 +59,9 @@ const Query = {
   async post(parent, args, { database, request }, info) {
     const userId = authorization(request, false);
     const posts = await database.query.posts({
+      first: args.limit,
+      skip: args.skip,
+      after: args.after,
       where:
       {
         id: userId,
@@ -69,8 +86,6 @@ const Query = {
         where: {
           OR: [{
             name_contains: args.query
-          }, {
-            email_contains: args.query
           }]
         }
       }
@@ -88,7 +103,11 @@ const Query = {
 
   },
   comments(parent, args, { database, request }, info) {
-    return database.query.comments(null, info);
+    return database.query.comments({
+      first: args.limit,
+      skip: args.skip,
+      after: args.after,
+    }, info);
   }
 }
 

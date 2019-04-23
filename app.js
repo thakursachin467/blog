@@ -24,7 +24,8 @@ const server = new GraphQLServer(
         pubsub,
         request
       }
-    }
+    },
+    fragmentReplacements
   });
 
 server.start({ port: Port }, () => {

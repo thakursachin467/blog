@@ -144,15 +144,11 @@ const Mutation = {
   async  editComment(parent, args, { database, request }, info) {
     const author = authorization(request);
     const commentId = args.id;
-    const commentExists = await database.exists.Comment({ id: commentId, author: { id: author } });
-    if (!commentExists) {
+    const commentExistsWithAuthor = await database.exists.Comment({ id: commentId, author: { id: author } });
+    if (!commentExistsWithAuthor) {
       throw new Error('You are not authorize to perform this action');
     }
     const { data } = args;
-    const comment = await database.exists.Comment({ id: commentId });
-    if (!comment) {
-      throw new Error('Comment does not exists')
-    }
     const comment = await database.mutation.updateComment({ where: { id: commentId }, data: { text: data.text } }, info)
     return comment;
   },

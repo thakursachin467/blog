@@ -1,3 +1,4 @@
+# import UserOrderByInput,PostOrderByInput, CommentOrderByInput from './generated/database.graphql'
 
 type Subscription {
   comment(postId:ID!): CommentSubscriptionPayload!
@@ -56,10 +57,10 @@ enum mutationType {
   type Query {
     me: User!
     post(id:ID!): Post!
-    users(query: String,limit: Int,skip: Int,after:String):[User!]!
-    posts(query:String,limit: Int,skip: Int,after: String):[Post!]!
-    comments(limit: Int,skip: Int,after: String):[Comment!]!
-    myPost(query:String,limit: Int,skip: Int,after: String):[Post!]!
+    users(query: String,limit: Int,skip: Int,after:String,orderBy:UserOrderByInput):[User!]!
+    posts(query:String,limit: Int,skip: Int,after: String,orderBy:PostOrderByInput):[Post!]!
+    comments(limit: Int,skip: Int,after: String,orderBy:CommentOrderByInput):[Comment!]!
+    myPost(query:String,limit: Int,skip: Int,after: String,orderBy:PostOrderByInput):[Post!]!
   }
 
   input CreateUserInput {
@@ -102,13 +103,13 @@ enum mutationType {
     user: User!
   }
 
-  type loginUserInput{
+  input LoginUserInput{
     email: String!
     password: String!
   }
   type Mutation {
     createUser(data:CreateUserInput):authPayload!
-    loginUser(data:loginUserInput):authPayload!
+    loginUser(data:LoginUserInput):authPayload!
     editUser(data:editUserInput):User!
     deleteUser:User!
     createPost(data:CreatePostInput):Post!

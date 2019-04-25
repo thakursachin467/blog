@@ -5,6 +5,7 @@ const Query = {
       first: args.limit,
       skip: args.skip,
       after: args.after,
+      orderBy: args.orderBy,
       where: {
         Published: true
       }
@@ -13,6 +14,8 @@ const Query = {
       filter = {
         first: args.first,
         skip: args.skip,
+        after: args.after,
+        orderBy: args.orderBy,
         where: {
           Published: true,
           OR: [{
@@ -31,6 +34,7 @@ const Query = {
       first: args.limit,
       skip: args.skip,
       after: args.after,
+      orderBy: args.orderBy,
       where:
         { author: { id: userId } }
     };
@@ -39,6 +43,7 @@ const Query = {
         first: args.limit,
         skip: args.skip,
         after: args.after,
+        orderBy: args.orderBy,
         where: {
           author: { id: userId },
           OR: [{
@@ -59,9 +64,6 @@ const Query = {
   async post(parent, args, { database, request }, info) {
     const userId = authorization(request, false);
     const posts = await database.query.posts({
-      first: args.limit,
-      skip: args.skip,
-      after: args.after,
       where:
       {
         id: userId,
@@ -83,14 +85,20 @@ const Query = {
     let filter = {}
     if (args.query) {
       filter = {
+        first: args.limit,
+        skip: args.skip,
+        after: args.after,
+        orderBy: args.orderBy,
         where: {
           OR: [{
-            name_contains: args.query
+            firstName_contains: args.query
+          }, {
+            lastName_contains: args.query
           }]
         }
       }
     }
-    return database.query.users(null, info);
+    return database.query.users(filter, info);
 
   },
   async me(parent, args, { database, request }, info) {
@@ -107,6 +115,7 @@ const Query = {
       first: args.limit,
       skip: args.skip,
       after: args.after,
+      orderBy: args.orderBy,
     }, info);
   }
 }

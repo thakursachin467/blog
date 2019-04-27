@@ -78,6 +78,7 @@ const Mutation = {
   },
   async editPost(parent, { id, data }, { database, request }, info) {
     const userId = authorization(request)
+    const postId = id;
     const postFound = await database.exists.Post({ id: postId, author: { id: userId } });
     if (!postFound) {
       throw new Error('You are not authorize to perform this action!')

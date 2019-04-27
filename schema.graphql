@@ -7,9 +7,9 @@ type Subscription {
 }
 
 enum mutationType {
-  Created
-  Deleted
-  Updated
+  CREATED
+  DELETED
+  UPDATED
 }
  type PostSubscriptionPayload{
    mutation:mutationType!
@@ -79,7 +79,6 @@ enum mutationType {
 
   input CreateCommentInput {
     text:String!,
-    author:ID!,
     post:ID!
   }
 

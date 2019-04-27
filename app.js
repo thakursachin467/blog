@@ -1,10 +1,19 @@
+import '@babel/polyfill';
 import { GraphQLServer, PubSub } from 'graphql-yoga';
 import db from './db';
 import { resolvers, fragmentReplacements } from './resolvers/index';
 import database from './prisma';
 const Port = process.env.Port || 8000;
 import * as Sentry from '@sentry/node';
-import Keys from './Config/Credintials/Keys';
+
+
+let Keys;
+if (process.env.ENVIRONMENT === 'PRODUCTION') {
+  Keys = process.env;
+} else {
+  Keys = require('./Config/Credintials/Keys')
+
+}
 
 Sentry.init({ dsn: Keys.sentryKey });
 
@@ -28,6 +37,6 @@ const server = new GraphQLServer(
     fragmentReplacements
   });
 
-server.start({ port: Port }, () => {
+server.start({ port: Port, tracing: true }, () => {
   console.log(`Server Starting on port ${Port}`)
 })

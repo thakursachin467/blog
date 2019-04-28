@@ -6,7 +6,6 @@
   "scripts": {
     "test": "jest --watch",
     "heroku-prebuild": "echo Build Started",
-    "heroku-postbuild": "babel src --out-dir dist",
     "start": "nodemon app.js --ext test,js,graphql --exec babel-node",
     "start-dev": "env-cmd ./database/Config/dev.env nodemon app.js --ext test,js,graphql --exec babel-node",
     "get-schema": "graphql get-schema -p blog-api --dotenv ./database/Config/dev.env"

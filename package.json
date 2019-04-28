@@ -4,11 +4,16 @@
   "description": "A GRAPHQL API for blog",
   "main": "app.js",
   "scripts": {
-    "test": "jest --watch",
+    "test": "env-cmd ./database/Config/test.env jest --watch",
     "heroku-prebuild": "echo Build Started",
+    "build": "babel . --out-dir dist",
     "start": "nodemon app.js --ext test,js,graphql --exec babel-node",
     "start-dev": "env-cmd ./database/Config/dev.env nodemon app.js --ext test,js,graphql --exec babel-node",
     "get-schema": "graphql get-schema -p blog-api --dotenv ./database/Config/dev.env"
+  },
+  "jest": {
+    "globalSetup": "./tests/jest/globalsetup.js",
+    "globalTeardown": "./tests/jest/globalteardown.js"
   },
   "author": "Sachin Thakur",
   "license": "ISC",
@@ -22,17 +27,22 @@
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
     "@sentry/node": "^5.0.5",
+    "apollo-boost": "^0.1.14",
     "appmetrics-dash": "^4.1.0",
     "appmetrics-prometheus": "^2.0.0",
     "appmetrics-zipkin": "^1.1.1",
+    "babel-register": "^6.26.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
+    "cross-fetch": "^2.2.2",
     "env-cmd": "^8.0.2",
     "express": "^4.16.4",
+    "graphql": "^14.0.2",
     "graphql-cli": "^3.0.11",
     "graphql-yoga": "^1.17.4",
     "jsonwebtoken": "^8.5.1",
     "log4js": "^4.1.0",
+    "pm2": "^3.5.0",
     "prisma-binding": "^2.3.10"
   }
 }

@@ -4,12 +4,12 @@
   "description": "A GRAPHQL API for blog",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --watch",
     "heroku-prebuild": "echo Build Started",
     "heroku-postbuild": "babel src --out-dir dist",
-    "start": "env-cmd ./database/Config/prod.env node app.js --ext js,graphql --exec babel-node",
-    "start-dev": "env-cmd ./database/Config/dev.env nodemon app.js --ext js,graphql --exec babel-node",
-    "get-schema": "graphql get-schema -p blog-api"
+    "start": "nodemon app.js --ext test,js,graphql --exec babel-node",
+    "start-dev": "env-cmd ./database/Config/dev.env nodemon app.js --ext test,js,graphql --exec babel-node",
+    "get-schema": "graphql get-schema -p blog-api --dotenv ./database/Config/dev.env"
   },
   "author": "Sachin Thakur",
   "license": "ISC",
@@ -17,10 +17,11 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
+    "jest": "^24.7.1",
     "nodemon": "^1.18.10"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.4.4",
+    "@babel/polyfill": "^7.0.0",
     "@sentry/node": "^5.0.5",
     "appmetrics-dash": "^4.1.0",
     "appmetrics-prometheus": "^2.0.0",

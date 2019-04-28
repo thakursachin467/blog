@@ -1,10 +1,12 @@
 import { Prisma } from 'prisma-binding';
 import { fragmentReplacements } from './resolvers/index';
-import * as Keys from './Config/Credintials/Keys';
+let Keys = process.env || require('./Config/Credintials/Keys')
+
+
 const prisma = new Prisma({
   typeDefs: './generated/database.graphql',
   endpoint: process.env.PRISMA_ENDPOINT,
-  secret: 'thisismysecrettext',
+  secret: Keys.prismaSecret,
   fragmentReplacements
 })
 
